@@ -1,0 +1,9 @@
+{
+  "name": "FriesLab Menu",
+  "short_name": "FriesLab",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#121212",
+  "icons": [{ "src": "logo.webp", "sizes": "512x512", "type": "image/webp", "purpose": "any" }]
+}

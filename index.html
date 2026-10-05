@@ -1,0 +1,1026 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>FriesLab Menu</title>
+<meta name="theme-color" content="#121212">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="logo.webp">
+<link rel="apple-touch-icon" href="logo.webp">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Lilita+One&family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #121212;
+    --card: #1e1e1e;
+    --line: #2d2d2d;
+    --text: #f6efe3;
+    --muted: #9b958c;
+    --gold: #e2b33b;
+    --gold-2: #f3cd5d;
+    --gold-ink: #2a1e05;
+    --red: #8e0b0b;
+    --red-2: #b3161a;
+    --skin: #f4c99b;
+    --skin-line: #7a4a22;
+    --radius: 18px;
+    --display: 'Bebas Neue', Impact, sans-serif;
+    --round: 'Lilita One', 'Bebas Neue', sans-serif;
+    --body: 'Poppins', system-ui, sans-serif;
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; background: #0b0b0b; color: var(--text); font-family: var(--body); }
+  body { min-height: 100vh; }
+  button { font: inherit; color: inherit; border: 0; background: none; cursor: pointer; }
+  img { display: block; }
+  .app { max-width: 520px; margin: 0 auto; min-height: 100vh; background: var(--bg); position: relative; padding-bottom: 110px; box-shadow: 0 0 0 1px #1d1d1d; }
+
+  /* ---------- loyalty top bar ---------- */
+  .topbar { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: #161616; border-bottom: 1px solid var(--line); }
+  .topbar .mini-logo { width: 34px; height: 34px; object-fit: contain; }
+  .rank { flex: 1; min-width: 0; }
+  .rank-line { display: flex; align-items: baseline; gap: 8px; white-space: nowrap; }
+  .rank-name { font-weight: 700; font-size: 15px; }
+  .rank-next { font-size: 11px; color: var(--muted); overflow: hidden; text-overflow: ellipsis; }
+  .rank-bar { height: 4px; background: #2b2b2b; border-radius: 4px; margin-top: 6px; overflow: hidden; max-width: 320px; }
+  .rank-bar i { display: block; height: 100%; width: 0; background: linear-gradient(90deg, var(--gold), var(--gold-2)); border-radius: 4px; transition: width .6s ease; }
+  .join-btn { display: inline-flex; align-items: center; gap: 6px; background: var(--gold); color: var(--gold-ink); font-weight: 700; font-size: 13px; padding: 8px 14px; border-radius: 999px; white-space: nowrap; }
+  .join-btn svg { width: 15px; height: 15px; }
+
+  .brand { display: flex; align-items: center; gap: 12px; padding: 12px 14px; background: linear-gradient(90deg, #6b0606, var(--red) 55%, #5a0404); }
+  .brand img { height: 40px; width: auto; }
+  .brand p { margin: 0; font-size: 12px; color: #f2d9c9; }
+
+  /* ---------- treasure: mascot + chest ---------- */
+  .treasure { background: radial-gradient(120% 90% at 30% 40%, #a30d0d 0%, #7c0707 45%, #3d0303 100%); }
+  .treasure-inner { display: flex; align-items: center; gap: 8px; padding: 14px 14px 16px; }
+  .stage { position: relative; width: 56%; flex-shrink: 0; display: flex; align-items: flex-end; }
+  .stage .mascot { width: 46%; margin-right: -14%; position: relative; z-index: 2; }
+  .chest-wrap { position: relative; flex: 1; }
+  .chest-wrap::before { content: ""; position: absolute; inset: 0 0 10%; background: radial-gradient(closest-side, rgba(255,200,60,.55), transparent); opacity: 0; transition: opacity .4s; }
+  .chest-wrap.open::before { opacity: 1; }
+  .chest { width: 100%; height: auto; display: block; position: relative; filter: drop-shadow(0 8px 10px rgba(0,0,0,.45)); }
+  .chest .lid-open, .chest .coins { display: none; }
+  .chest.open .lid-open, .chest.open .coins { display: inline; }
+  .chest.open .lid-closed { display: none; }
+  .bump { animation: bump .45s ease; }
+  .pop { animation: bump .4s; }
+  @keyframes bump { 0%{transform:scale(1)} 35%{transform:scale(1.08) rotate(-2deg)} 70%{transform:scale(.97) rotate(1deg)} 100%{transform:scale(1)} }
+
+  /* mascot */
+  .mascot { display: block; height: auto; overflow: visible; filter: drop-shadow(0 6px 6px rgba(0,0,0,.35)); }
+  /* parts inside the <use> mascot are styled through inherited variables (selectors can't reach in) */
+  .mascot { --grin: inline; --open: none; --arm: 1; }
+  .mascot.reaching { --grin: none; --open: inline; --arm: 0; }
+  .stage .mascot { animation: breathe 2.6s ease-in-out infinite; transform-origin: 50% 95%; }
+  @keyframes breathe { 50% { transform: translateY(-1.5px) rotate(-1.5deg); } }
+
+  /* peek mascot (pops up when the big one is scrolled away) */
+  .peek { position: fixed; bottom: 70px; width: 92px; z-index: 31; transform: translateY(calc(100% + 90px)); visibility: hidden; transition: transform .25s cubic-bezier(.2,.9,.3,1.3), visibility 0s .25s; pointer-events: none; }
+  .peek.show { transform: translateY(0); visibility: visible; transition: transform .25s cubic-bezier(.2,.9,.3,1.3); }
+
+  .loot { flex: 1; min-width: 0; }
+  .loot .kicker { font-size: 10px; letter-spacing: .25em; color: #f0bcbc; font-weight: 600; }
+  .loot .pieces { font-size: 13px; font-weight: 600; margin-top: 2px; }
+  .loot .total { font-family: var(--display); font-size: 30px; color: var(--gold-2); line-height: 1; margin: 2px 0 6px; }
+  .loot ul { list-style: none; margin: 0; padding: 0; font-size: 12px; }
+  .loot li { display: flex; gap: 6px; white-space: nowrap; overflow: hidden; line-height: 1.6; }
+  .loot li b { color: var(--gold); font-weight: 400; font-family: var(--display); font-size: 14px; letter-spacing: .03em; }
+  .loot li span { overflow: hidden; text-overflow: ellipsis; }
+  .loot .more, .loot .hint { font-size: 11px; color: #f0bcbc; }
+  .loot li.hint { white-space: normal; line-height: 1.4; }
+  .secured { font-family: var(--display); letter-spacing: .32em; text-align: center; color: var(--gold); font-size: 20px; padding: 0; max-height: 0; overflow: hidden; opacity: 0; transition: all .45s ease; }
+  .secured.show { max-height: 50px; padding: 12px 0 2px; opacity: 1; }
+  .secured.stamp { animation: stamp .55s cubic-bezier(.2,1.6,.4,1); }
+  @keyframes stamp { 0%{transform:scale(1.6); opacity:0} 100%{transform:scale(1); opacity:1} }
+
+  /* desktop-only cart list in the side panel */
+  .side-extra { display: none; }
+
+  /* ---------- category pills ---------- */
+  .pills-wrap { position: sticky; top: 0; z-index: 20; background: rgba(18,18,18,.94); backdrop-filter: blur(8px); border-bottom: 1px solid var(--line); }
+  .pills { display: flex; gap: 8px; overflow-x: auto; padding: 12px 14px; scrollbar-width: none; scroll-behavior: smooth; }
+  .pills::-webkit-scrollbar { display: none; }
+  .pill { flex-shrink: 0; font-family: var(--display); font-size: 17px; letter-spacing: .05em; padding: 9px 16px 7px; border-radius: 999px; border: 1px solid #3a3a3a; background: #1c1c1c; color: #e9e2d6; transition: background .2s, color .2s, transform .15s; }
+  .pill:active { transform: scale(.95); }
+  .pill.active { background: var(--gold); color: var(--gold-ink); border-color: var(--gold); }
+  .pill .n { display: none; }
+
+  /* ---------- items ---------- */
+  .bench { font-size: 11px; letter-spacing: .22em; color: var(--muted); font-weight: 600; padding: 16px 16px 10px; text-transform: uppercase; }
+  .items { display: grid; gap: 16px; padding: 0 14px; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: var(--radius); padding: 10px; animation: rise .45s both; display: flex; flex-direction: column; transition: transform .2s, border-color .2s; }
+  @keyframes rise { from { opacity: 0; transform: translateY(14px); } }
+  .card .ph { position: relative; border-radius: 14px; overflow: hidden; background: #e9e9e9; aspect-ratio: 1 / .92; }
+  .card .ph img { width: 100%; height: 100%; object-fit: cover; transition: transform .35s, opacity .2s; }
+  .card .ph.grabbed img { animation: snatched .5s ease; }
+  @keyframes snatched { 30% { transform: scale(.9) translateY(-6px); opacity: .55; } }
+  .badges { position: absolute; top: 10px; left: 10px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .badge { font-size: 10px; font-weight: 700; padding: 4px 8px; border-radius: 999px; background: rgba(0,0,0,.72); color: #fff; letter-spacing: .04em; }
+  .badge.new { background: var(--gold); color: var(--gold-ink); }
+  .badge.best { background: var(--red-2); }
+  .card h3 { font-family: var(--display); font-weight: 400; font-size: 24px; letter-spacing: .03em; margin: 12px 4px 4px; }
+  .card .desc { font-size: 12.5px; color: #a8a299; margin: 0 4px; line-height: 1.5; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; cursor: pointer; }
+  .card .desc.open { -webkit-line-clamp: unset; }
+  .card .foot { display: flex; align-items: center; justify-content: space-between; margin: auto 4px 2px; padding-top: 12px; }
+  .price { font-family: var(--display); font-size: 24px; color: var(--gold); letter-spacing: .03em; }
+  .add { width: 42px; height: 42px; border-radius: 50%; background: var(--gold); color: var(--gold-ink); display: grid; place-items: center; box-shadow: 0 4px 14px rgba(226,179,59,.25); transition: transform .15s; }
+  .add:active { transform: scale(.88); }
+  .add svg { width: 20px; height: 20px; }
+  .stepper { display: flex; align-items: center; gap: 4px; background: #2a2a2a; border-radius: 999px; padding: 3px; }
+  .stepper button { width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center; font-size: 20px; font-weight: 600; }
+  .stepper button.plus { background: var(--gold); color: var(--gold-ink); }
+  .stepper output { min-width: 22px; text-align: center; font-weight: 700; }
+
+  /* ---------- bottom bar (mobile) ---------- */
+  .bar { position: fixed; left: 50%; bottom: 0; width: 100%; max-width: 520px; transform: translate(-50%, 110%); transition: transform .4s cubic-bezier(.2,.8,.2,1); z-index: 30; background: linear-gradient(90deg, #5c0505, var(--red) 50%, #5c0505); padding: 12px 14px calc(12px + env(safe-area-inset-bottom)); display: flex; align-items: center; gap: 10px; box-shadow: 0 -10px 30px rgba(0,0,0,.5); }
+  .bar.show { transform: translate(-50%, 0); }
+  .reset { font-size: 12px; letter-spacing: .12em; font-weight: 600; color: #f0c9c9; padding: 8px 4px; }
+  .bar-sum { flex: 1; text-align: right; line-height: 1.1; }
+  .bar-sum small { display: block; font-size: 10px; letter-spacing: .22em; color: #f0bcbc; font-weight: 600; }
+  .bar-sum strong { font-family: var(--display); font-size: 24px; letter-spacing: .03em; font-weight: 400; }
+  .send { display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: var(--gold); color: var(--gold-ink); font-family: var(--display); font-size: 20px; letter-spacing: .06em; padding: 11px 20px 9px; border-radius: 999px; }
+  .send svg { width: 18px; height: 18px; }
+
+  /* ---------- the stretchy arm layer ---------- */
+  #armLayer { position: fixed; inset: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 80; overflow: visible; }
+  .food { position: fixed; z-index: 81; width: 58px; height: 58px; margin: -29px 0 0 -29px; border-radius: 50%; background: #eee center / cover no-repeat; border: 3px solid var(--gold-2); box-shadow: 0 6px 16px rgba(0,0,0,.45); pointer-events: none; }
+
+  /* ---------- overlays ---------- */
+  .overlay { position: fixed; inset: 0; z-index: 50; display: none; justify-content: center; background: rgba(0,0,0,.55); backdrop-filter: blur(6px); }
+  .overlay.show { display: flex; animation: fade .35s; }
+  @keyframes fade { from { opacity: 0; } }
+  .sheet { width: 100%; max-width: 520px; height: 100%; overflow-y: auto; background: rgba(16,16,16,.97); padding: 0 16px 40px; position: relative; }
+  .sheet-top { position: sticky; top: 0; z-index: 2; display: flex; align-items: center; gap: 10px; padding: 12px 0; background: rgba(16,16,16,.97); }
+  .tip { flex: 1; display: flex; align-items: center; gap: 10px; font-size: 12px; background: #1f1f1f; border: 1px solid var(--line); border-radius: 12px; padding: 8px 12px; color: #e6dfd3; }
+  .tip svg { width: 20px; flex-shrink: 0; }
+  .close { width: 38px; height: 38px; border-radius: 50%; background: #222; display: grid; place-items: center; font-size: 20px; flex-shrink: 0; }
+  .crate { width: 46%; max-width: 220px; margin: 8px auto 0; display: block; animation: drop .7s cubic-bezier(.3,1.5,.5,1) both; }
+  @keyframes drop { from { transform: translateY(-60px); opacity: 0; } }
+  .ready-check { width: 64px; height: 64px; margin: 14px auto 6px; display: block; }
+  .ready-check .ring { fill: none; stroke: var(--red-2); stroke-width: 3.5; stroke-linecap: round; stroke-dasharray: 164; stroke-dashoffset: 120; transform-origin: 50% 50%; animation: spin .8s linear infinite; }
+  .ready-check .tick { fill: none; stroke: var(--red-2); stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; stroke-dasharray: 40; stroke-dashoffset: 40; }
+  .ready-check.done .ring { animation: none; stroke-dashoffset: 0; transition: stroke-dashoffset .35s; }
+  .ready-check.done .tick { stroke-dashoffset: 0; transition: stroke-dashoffset .35s .25s; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .sheet h2 { font-family: var(--round); font-weight: 400; font-size: 30px; text-align: center; margin: 4px 0; }
+  .sub { text-align: center; color: var(--muted); font-size: 13px; margin: 0 0 18px; }
+  .receipt { background: #1e1e1e; border: 1px solid var(--line); border-radius: 18px; padding: 14px 16px; }
+  .receipt .row { display: flex; align-items: center; gap: 10px; padding: 7px 0; font-size: 14.5px; }
+  .receipt .row svg { width: 14px; flex-shrink: 0; }
+  .receipt .row .nm { flex: 1; }
+  .receipt .row .qt { color: var(--gold); font-family: var(--display); font-size: 16px; }
+  .receipt .row .pr { font-weight: 600; }
+  .receipt .tot { display: flex; justify-content: space-between; align-items: center; border-top: 1px dashed #3a3a3a; margin-top: 10px; padding-top: 14px; font-weight: 700; letter-spacing: .06em; }
+  .receipt .tot b { font-family: var(--display); font-size: 30px; color: var(--red-2); letter-spacing: .03em; font-weight: 400; }
+  .label { font-size: 11px; letter-spacing: .18em; color: var(--muted); font-weight: 600; margin: 22px 0 10px; text-transform: uppercase; }
+  .types { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .type { background: #1f1f1f; border: 1px solid var(--line); border-radius: 14px; padding: 12px 6px; display: grid; justify-items: center; gap: 6px; font-size: 13px; font-weight: 500; transition: background .2s; }
+  .type svg { width: 24px; height: 24px; }
+  .type.active { background: var(--red); border-color: var(--red-2); }
+  .field { display: block; width: 100%; background: #1c1c1c; border: 1px solid var(--line); border-radius: 12px; color: var(--text); padding: 13px 14px; font: inherit; font-size: 14px; margin-bottom: 10px; outline: none; }
+  .field:focus { border-color: var(--gold); }
+  .field.bad { border-color: var(--red-2); animation: shake .3s; }
+  @keyframes shake { 25%{transform:translateX(-5px)} 75%{transform:translateX(5px)} }
+  textarea.field { resize: vertical; min-height: 76px; }
+  .wa { width: 100%; margin-top: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; background: var(--red); border: 1px solid var(--red-2); color: #fff; font-weight: 700; font-size: 15px; padding: 15px; border-radius: 14px; }
+  .wa svg { width: 22px; }
+  .earn-note { text-align: center; font-size: 12px; color: var(--gold); margin-top: 10px; }
+
+  .modal { margin: auto 16px; width: 100%; max-width: 420px; background: #1a1a1a; border: 1px solid var(--line); border-radius: 22px; padding: 22px 18px; align-self: center; animation: rise .35s; }
+  .modal h2 { font-family: var(--round); font-weight: 400; font-size: 26px; margin: 4px 0; text-align: center; }
+  .ranks { display: grid; gap: 6px; margin: 14px 0 16px; font-size: 13px; }
+  .ranks div { display: flex; justify-content: space-between; padding: 8px 12px; background: #222; border-radius: 10px; }
+  .ranks div.me { background: var(--gold); color: var(--gold-ink); font-weight: 700; }
+  .gold-btn { width: 100%; background: var(--gold); color: var(--gold-ink); font-weight: 700; padding: 14px; border-radius: 14px; font-size: 15px; }
+  .ghost-btn { width: 100%; padding: 12px; color: var(--muted); font-size: 14px; margin-top: 6px; }
+
+  /* ---------- mini-game ---------- */
+  .game { position: fixed; inset: 0; z-index: 60; display: none; justify-content: center; align-items: center; background: #0e0c09; }
+  .game.show { display: flex; }
+  .game-box { position: relative; width: 100%; max-width: 520px; height: 100%; overflow: hidden; }
+  #gc { width: 100%; height: 100%; display: block; touch-action: none; }
+  .hud { position: absolute; top: 14px; left: 0; right: 0; display: flex; justify-content: space-between; align-items: center; padding: 0 14px; pointer-events: none; }
+  .hud .score { font-family: var(--display); font-size: 44px; color: var(--gold-2); text-shadow: 0 3px 0 rgba(0,0,0,.4); }
+  .hud button { pointer-events: auto; }
+  .game-card { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: calc(100% - 48px); max-width: 360px; background: rgba(26,22,15,.94); border: 1px solid #4a3d1d; border-radius: 22px; padding: 22px; text-align: center; }
+  .game-card h2 { font-family: var(--round); font-weight: 400; font-size: 30px; margin: 0 0 4px; color: var(--gold-2); }
+  .game-card p { margin: 6px 0 16px; color: #d6cbb5; font-size: 14px; }
+  .game-card .big { font-family: var(--display); font-size: 56px; color: var(--gold-2); line-height: 1; }
+  .hidden { display: none !important; }
+
+  .toast { position: fixed; left: 50%; top: 18px; transform: translate(-50%, -60px); opacity: 0; background: var(--gold); color: var(--gold-ink); font-weight: 700; font-size: 13px; padding: 10px 16px; border-radius: 999px; z-index: 100; transition: transform .35s, opacity .35s; white-space: nowrap; pointer-events: none; }
+  .toast.show { transform: translate(-50%, 0); opacity: 1; }
+
+  /* =========================================================
+     TABLET  (640px+)  — two-column item grid
+     ========================================================= */
+  @media (min-width: 640px) {
+    .app, .bar { max-width: 820px; }
+    .items { grid-template-columns: repeat(2, 1fr); }
+    .stage { width: 44%; }
+  }
+
+  /* =========================================================
+     WEB / DESKTOP  (1024px+)
+     categories left · menu grid middle · treasure + cart right
+     ========================================================= */
+  @media (min-width: 1024px) {
+    .app { max-width: 1440px; padding-bottom: 40px; box-shadow: none; }
+    .topbar { padding: 12px 32px; gap: 20px; }
+    .topbar .mini-logo { display: none; }
+    .rank { flex: 0 1 380px; margin-left: auto; order: 2; }
+    .join-btn { order: 3; font-size: 14px; padding: 10px 18px; }
+    .topbar::before { content: "FRIESLAB MENU"; font-family: var(--display); font-size: 22px; letter-spacing: .12em; color: var(--gold); order: 1; }
+    .brand { padding: 22px 32px; gap: 20px; }
+    .brand img { height: 64px; }
+    .brand p { font-size: 15px; }
+
+    .layout { display: grid; grid-template-columns: 230px minmax(0, 1fr) 380px; grid-template-areas: "nav menu side"; gap: 28px; padding: 28px 32px; align-items: start; }
+    .pills-wrap { grid-area: nav; top: 24px; background: none; border: 0; backdrop-filter: none; }
+    .pills { flex-direction: column; overflow: visible; padding: 0; gap: 6px; }
+    .pills::before { content: "Categories"; font-size: 11px; letter-spacing: .2em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0 0 8px 4px; }
+    .pill { text-align: left; border-radius: 12px; padding: 11px 14px 9px; display: flex; justify-content: space-between; align-items: center; }
+    .pill:hover:not(.active) { background: #242424; border-color: #4a4a4a; }
+    .pill .n { display: inline; font-family: var(--body); font-size: 11px; opacity: .6; }
+
+    .menu { grid-area: menu; min-width: 0; }
+    .bench { padding: 0 2px 14px; }
+    .items { padding: 0; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 20px; }
+    .card:hover { transform: translateY(-4px); border-color: #444; }
+    .card:hover .ph img { transform: scale(1.04); }
+    .card .ph { aspect-ratio: 4 / 3.3; }
+
+    .side { grid-area: side; position: sticky; top: 24px; border-radius: 22px; overflow: hidden; border: 1px solid var(--line); background: #171717; max-height: calc(100vh - 48px); display: flex; flex-direction: column; }
+    .treasure-inner { padding: 18px 18px 16px; }
+    .stage { width: 58%; }
+    .loot ul, .loot .more { display: none; }
+    .secured.show { padding: 12px 0 0; }
+    .side-extra { display: flex; flex-direction: column; min-height: 0; flex: 1; }
+    .cart-list { overflow-y: auto; padding: 8px 18px; flex: 1; min-height: 60px; }
+    .cart-row { display: flex; align-items: center; gap: 10px; padding: 10px 0; border-bottom: 1px solid #242424; font-size: 14px; }
+    .cart-row .nm { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .cart-row .stepper button { width: 28px; height: 28px; font-size: 16px; }
+    .cart-row .pr { width: 64px; text-align: right; font-weight: 600; }
+    .cart-empty { color: var(--muted); font-size: 13px; text-align: center; padding: 18px 8px; }
+    .side-foot { padding: 14px 18px 18px; border-top: 1px solid var(--line); background: #141414; }
+    .side-total { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 12px; }
+    .side-total span { font-size: 12px; letter-spacing: .2em; color: var(--muted); font-weight: 600; }
+    .side-total b { font-family: var(--display); font-size: 32px; color: var(--gold-2); font-weight: 400; }
+    .side-actions { display: flex; gap: 10px; }
+    .side-actions .send { flex: 1; }
+    .side-actions .send:disabled { opacity: .4; cursor: not-allowed; }
+    .side-actions .reset { padding: 8px 12px; }
+
+    .bar, .peek { display: none; }
+
+    .overlay { align-items: center; }
+    .sheet { height: auto; max-height: 92vh; max-width: 560px; border-radius: 24px; border: 1px solid var(--line); }
+    .game { background: rgba(0,0,0,.75); backdrop-filter: blur(6px); }
+    .game-box { height: min(92vh, 860px); border-radius: 24px; border: 1px solid #3a3020; }
+  }
+  @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <img class="mini-logo" src="logo.webp" alt="FriesLab">
+    <div class="rank">
+      <div class="rank-line"><span class="rank-name" id="rankName">Stowaway</span><span class="rank-next" id="rankNext">300 to Deckhand</span></div>
+      <div class="rank-bar"><i id="rankFill"></i></div>
+    </div>
+    <button class="join-btn" id="joinBtn"></button>
+  </header>
+
+  <div class="brand">
+    <img src="logo.webp" alt="FriesLab">
+    <p>Lab-grade fries. Seriously good burgers.</p>
+  </div>
+
+  <div class="layout">
+    <!-- treasure chest + mascot (mobile: top of page · web: right sidebar with full cart) -->
+    <aside class="side">
+      <section class="treasure">
+        <div class="treasure-inner">
+          <div class="stage">
+            <svg class="mascot" id="mascot" viewBox="0 0 120 150" aria-hidden="true"><use href="#mascotSym"/></svg>
+            <div class="chest-wrap" id="chestWrap">
+              <svg class="chest" id="chest" viewBox="0 0 200 165" aria-hidden="true">
+                <defs>
+                  <linearGradient id="wood" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7a3518"/><stop offset="1" stop-color="#3b1408"/></linearGradient>
+                  <linearGradient id="goldg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffe08a"/><stop offset=".5" stop-color="#d9a52c"/><stop offset="1" stop-color="#8f6512"/></linearGradient>
+                  <radialGradient id="coin"><stop offset="0" stop-color="#fff3b0"/><stop offset=".6" stop-color="#f1c43f"/><stop offset="1" stop-color="#a87a10"/></radialGradient>
+                </defs>
+                <g class="lid-open">
+                  <path d="M30 78 L42 18 Q100 2 158 18 L170 78 Z" fill="#2b0d05"/>
+                  <path d="M42 18 Q100 2 158 18 L162 34 Q100 18 38 34 Z" fill="url(#wood)"/>
+                  <path d="M30 78 L42 18 Q100 2 158 18 L170 78" fill="none" stroke="url(#goldg)" stroke-width="6" stroke-linejoin="round"/>
+                  <rect x="94" y="8" width="12" height="70" fill="url(#goldg)" opacity=".9"/>
+                </g>
+                <g class="coins" id="coinPile"></g>
+                <rect x="20" y="78" width="160" height="78" rx="8" fill="url(#wood)"/>
+                <g stroke="#2a0c04" stroke-width="2" opacity=".6"><line x1="22" y1="104" x2="178" y2="104"/><line x1="22" y1="130" x2="178" y2="130"/></g>
+                <rect x="20" y="76" width="160" height="9" rx="3" fill="url(#goldg)"/>
+                <rect x="20" y="148" width="160" height="9" rx="3" fill="url(#goldg)"/>
+                <rect x="38" y="78" width="12" height="78" fill="url(#goldg)"/>
+                <rect x="150" y="78" width="12" height="78" fill="url(#goldg)"/>
+                <g fill="#6b4a0c"><circle cx="44" cy="96" r="2"/><circle cx="44" cy="120" r="2"/><circle cx="44" cy="142" r="2"/><circle cx="156" cy="96" r="2"/><circle cx="156" cy="120" r="2"/><circle cx="156" cy="142" r="2"/></g>
+                <rect x="86" y="86" width="28" height="32" rx="5" fill="url(#goldg)" stroke="#6b4a0c" stroke-width="1.5"/>
+                <circle cx="100" cy="99" r="4" fill="#2a1505"/><rect x="98.5" y="100" width="3" height="9" rx="1" fill="#2a1505"/>
+                <g class="lid-closed">
+                  <path d="M20 80 V58 Q20 30 100 30 Q180 30 180 58 V80 Z" fill="url(#wood)"/>
+                  <path d="M20 80 V58 Q20 30 100 30 Q180 30 180 58 V80" fill="none" stroke="url(#goldg)" stroke-width="6"/>
+                  <rect x="38" y="33" width="12" height="47" fill="url(#goldg)"/>
+                  <rect x="150" y="33" width="12" height="47" fill="url(#goldg)"/>
+                </g>
+              </svg>
+            </div>
+          </div>
+          <div class="loot">
+            <div class="kicker">TREASURE</div>
+            <div class="pieces" id="pieces">0 pieces of eight</div>
+            <div class="total" id="lootTotal">$0.00</div>
+            <ul id="lootList"></ul>
+            <div class="more" id="lootMore"></div>
+          </div>
+        </div>
+      </section>
+      <div class="secured" id="secured">TREASURE SECURED</div>
+
+      <!-- web only -->
+      <div class="side-extra">
+        <div class="cart-list" id="cartList"></div>
+        <div class="side-foot">
+          <div class="side-total"><span>TOTAL</span><b id="sideTotal">$0.00</b></div>
+          <div class="side-actions">
+            <button class="reset" data-reset>RESET</button>
+            <button class="send" data-send>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>
+              SEND IT
+            </button>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <nav class="pills-wrap"><div class="pills" id="pills"></div></nav>
+
+    <section class="menu">
+      <div class="bench" id="bench"></div>
+      <main class="items" id="items"></main>
+    </section>
+  </div>
+</div>
+
+<!-- mobile bottom bar -->
+<div class="bar" id="bar">
+  <button class="reset" data-reset>RESET</button>
+  <div class="bar-sum" id="barSum"><small>TREASURE</small><strong id="barTxt">0 · $0.00</strong></div>
+  <button class="send" data-send>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2 11 13"/><path d="M22 2 15 22l-4-9-9-4 20-7z"/></svg>
+    SEND IT
+  </button>
+</div>
+
+<!-- mascot that pops up from the bottom when the chest is scrolled off-screen -->
+<svg class="peek mascot" id="peek" viewBox="0 0 120 150" aria-hidden="true"><use href="#mascotSym"/></svg>
+
+<!-- stretchy arm drawing layer -->
+<svg id="armLayer" aria-hidden="true"></svg>
+
+<!-- checkout -->
+<div class="overlay" id="checkout">
+  <div class="sheet">
+    <div class="sheet-top">
+      <div class="tip">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="2" y="6" width="20" height="12" rx="6"/><path d="M7 10v4M5 12h4"/><circle cx="16" cy="11" r="1" fill="currentColor"/><circle cx="18" cy="13" r="1" fill="currentColor"/></svg>
+        <span>Order via WhatsApp &amp; come back — a mini-game with points is waiting 🎮</span>
+      </div>
+      <button class="close" id="closeCheckout" aria-label="Close">✕</button>
+    </div>
+    <svg class="crate" viewBox="0 0 200 120" aria-hidden="true">
+      <defs><linearGradient id="slat" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#f4e2b8"/><stop offset="1" stop-color="#d9bd85"/></linearGradient></defs>
+      <rect x="8" y="10" width="184" height="104" rx="4" fill="#5b4122"/>
+      <g fill="url(#slat)"><rect x="8" y="10" width="184" height="22" rx="2"/><rect x="8" y="38" width="184" height="22" rx="2"/><rect x="8" y="66" width="184" height="22" rx="2"/><rect x="8" y="94" width="184" height="20" rx="2"/></g>
+      <g fill="#e8d09c" stroke="#b8975d" stroke-width="1"><rect x="8" y="8" width="20" height="108" rx="2"/><rect x="172" y="8" width="20" height="108" rx="2"/><rect x="90" y="8" width="20" height="108" rx="2"/></g>
+      <g fill="#9c7a44"><circle cx="18" cy="21" r="2"/><circle cx="182" cy="21" r="2"/><circle cx="18" cy="104" r="2"/><circle cx="182" cy="104" r="2"/></g>
+      <rect x="80" y="14" width="40" height="16" rx="4" fill="#8e0b0b"/>
+      <text x="100" y="26" text-anchor="middle" font-family="Bebas Neue, sans-serif" font-size="12" fill="#f3cd5d">LAB</text>
+    </svg>
+    <svg class="ready-check" id="readyCheck" viewBox="0 0 64 64"><circle class="ring" cx="32" cy="32" r="26"/><path class="tick" d="M20 33 l8 8 l16 -17"/></svg>
+    <h2>Crated up and ready</h2>
+    <p class="sub">Check it over, then send it to FriesLab on WhatsApp.</p>
+    <div class="receipt">
+      <div id="receiptRows"></div>
+      <div class="tot"><span>TOTAL</span><b id="receiptTotal">$0.00</b></div>
+    </div>
+    <div class="label">Order type</div>
+    <div class="types" id="types">
+      <button class="type active" data-type="Delivery">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="5.5" cy="17.5" r="3.5"/><circle cx="18.5" cy="17.5" r="3.5"/><path d="M15 6h2l3 8M5.5 17.5 9 9h5l2 5M12 9l-1-3H8"/></svg>Delivery</button>
+      <button class="type" data-type="Dine in">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 3v7a3 3 0 0 0 6 0V3M7 3v18M17 21V3c-2 0-4 2-4 6v5h4"/></svg>Dine in</button>
+      <button class="type" data-type="Take out">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14l-1 14H6L5 7z"/><path d="M9 10V6a3 3 0 0 1 6 0v4"/></svg>Take out</button>
+    </div>
+    <div class="label">Your details</div>
+    <input class="field" id="fName" placeholder="Name" autocomplete="name">
+    <input class="field" id="fPhone" placeholder="Phone number" inputmode="tel" autocomplete="tel">
+    <input class="field" id="fAddress" placeholder="Delivery address (building, floor, street)" autocomplete="street-address">
+    <input class="field hidden" id="fTable" placeholder="Table number" inputmode="numeric">
+    <div class="label">Notes (optional)</div>
+    <textarea class="field" id="fNotes" placeholder="No pickles, extra sauce, ring the bell twice…"></textarea>
+    <button class="wa" id="waBtn">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.3-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5a.9.9 0 0 0-.7.3 2.8 2.8 0 0 0-.9 2.1 4.9 4.9 0 0 0 1 2.6 11.2 11.2 0 0 0 4.3 3.8c1.6.7 2.2.7 3 .6a2.6 2.6 0 0 0 1.7-1.2 2.1 2.1 0 0 0 .2-1.2c-.1-.1-.3-.2-.5-.3z"/></svg>
+      Send order on WhatsApp
+    </button>
+    <div class="earn-note" id="earnNote"></div>
+  </div>
+</div>
+
+<!-- join & earn -->
+<div class="overlay" id="joinModal">
+  <div class="modal">
+    <svg viewBox="0 0 120 150" width="90" style="display:block;margin:0 auto"><use href="#mascotSym"/></svg>
+    <h2>Join the crew</h2>
+    <p class="sub" style="margin:0">Earn 10 points for every $1 you order, plus points from the mini-game. Climb the ranks.</p>
+    <div class="ranks" id="rankList"></div>
+    <input class="field" id="jName" placeholder="Your name">
+    <input class="field" id="jPhone" placeholder="Phone number" inputmode="tel">
+    <button class="gold-btn" id="joinSave">Join &amp; start earning</button>
+    <button class="ghost-btn" id="joinClose">Maybe later</button>
+  </div>
+</div>
+
+<!-- mini-game -->
+<div class="game" id="game">
+  <div class="game-box">
+    <canvas id="gc"></canvas>
+    <div class="hud"><span class="score" id="gScore">0</span><button class="close" id="gClose" aria-label="Back to menu">✕</button></div>
+    <div class="game-card" id="gStart">
+      <h2>Hat Flight</h2>
+      <p>Your order's on its way. Tap (or press Space) to keep the hat in the air, slip between the cannons and grab the fries. Every point counts toward your rank.</p>
+      <button class="gold-btn" id="gPlay">Tap to fly</button>
+      <p style="margin:12px 0 0;font-size:12px" id="gBest"></p>
+    </div>
+    <div class="game-card hidden" id="gOver">
+      <p style="margin:0">Splash!</p>
+      <div class="big" id="gFinal">0</div>
+      <p id="gEarned"></p>
+      <button class="gold-btn" id="gAgain">Fly again</button>
+      <button class="ghost-btn" id="gBack">Back to menu</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- shared drawings -->
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="hatSym" viewBox="0 0 100 60">
+    <!-- classic straw hat: tall rounded crown, thin red band, wide brim drooping at the edges -->
+    <!-- back of the brim (top surface, behind the crown) -->
+    <ellipse cx="50" cy="37" rx="46" ry="9.5" fill="#e2bd7c" stroke="#5c3d1c" stroke-width="1.6"/>
+    <!-- crown -->
+    <path d="M25 38 C23 14 35 4 50 4 C65 4 77 14 75 38 Z" fill="#e8c88c" stroke="#5c3d1c" stroke-width="1.6"/>
+    <path d="M62 7 C72 12 76 24 75 38 L66 38 C67 24 66 13 62 7 Z" fill="#c99f5c" opacity=".55"/>
+    <path d="M36 10 C33 15 31 22 31 28" stroke="#fff3d2" stroke-width="2.2" stroke-linecap="round" fill="none" opacity=".55"/>
+    <!-- red band -->
+    <path d="M25.3 30 C40 34 60 34 74.7 30 L75 37 C60 41 40 41 25 37 Z" fill="#c8161d" stroke="#5c1010" stroke-width="1.2"/>
+    <!-- front of the brim, curling down at both sides -->
+    <path d="M4 37 Q4 46 16 50 Q50 58 84 50 Q96 46 96 37 Q88 45 50 46.5 Q12 45 4 37 Z" fill="#d6ad68" stroke="#5c3d1c" stroke-width="1.6" stroke-linejoin="round"/>
+    <!-- straw texture -->
+    <g stroke="#a87b3e" stroke-width="1" stroke-linecap="round" fill="none" opacity=".75">
+      <path d="M40 12 l3 1"/><path d="M55 9 l3 1.5"/><path d="M47 18 l3 1"/><path d="M60 20 l2.5 1.5"/><path d="M36 23 l3 .5"/><path d="M52 25 l3 1"/><path d="M67 26 l2 1"/>
+      <path d="M12 34 l4 1"/><path d="M84 33 l4 1.5"/><path d="M20 44 l4 1"/><path d="M33 49 l4 .5"/><path d="M62 49 l4 -.5"/><path d="M78 46 l4 -1"/><path d="M89 41 l2 -1.5"/>
+    </g>
+  </symbol>
+  <!-- original straw-hat pirate mascot. Right shoulder (the stretchy arm) is at 84,90 -->
+  <symbol id="mascotSym" viewBox="0 0 120 150">
+    <defs>
+      <pattern id="stripes" width="10" height="10" patternUnits="userSpaceOnUse"><rect width="10" height="10" fill="#f3e6cf"/><rect width="10" height="5" fill="#b3161a"/></pattern>
+    </defs>
+    <g>
+      <!-- legs -->
+      <rect x="44" y="118" width="13" height="26" rx="5" fill="#2b2f45"/>
+      <rect x="63" y="118" width="13" height="26" rx="5" fill="#2b2f45"/>
+      <ellipse cx="49" cy="145" rx="10" ry="4.5" fill="#4a2a14"/>
+      <ellipse cx="71" cy="145" rx="10" ry="4.5" fill="#4a2a14"/>
+      <!-- left arm resting -->
+      <path d="M40 90 Q28 100 30 116" stroke="var(--skin-line,#7a4a22)" stroke-width="11" fill="none" stroke-linecap="round"/>
+      <path d="M40 90 Q28 100 30 116" stroke="#f4c99b" stroke-width="8" fill="none" stroke-linecap="round"/>
+      <circle cx="30" cy="117" r="6" fill="#f4c99b" stroke="#7a4a22" stroke-width="1.5"/>
+      <!-- torso: striped shirt + gold sash -->
+      <path d="M38 86 Q60 76 82 86 L86 122 Q60 128 34 122 Z" fill="url(#stripes)" stroke="#5a1010" stroke-width="1.5"/>
+      <path d="M35 112 Q60 118 85 112 L86 120 Q60 126 34 120 Z" fill="#e2b33b" stroke="#8f6512" stroke-width="1"/>
+      <circle cx="60" cy="118" r="3.5" fill="#8f6512"/>
+      <!-- right arm (hidden while the stretchy arm is out) -->
+      <g style="opacity: var(--arm, 1)">
+        <path d="M82 90 Q96 98 96 114" stroke="#7a4a22" stroke-width="11" fill="none" stroke-linecap="round"/>
+        <path d="M82 90 Q96 98 96 114" stroke="#f4c99b" stroke-width="8" fill="none" stroke-linecap="round"/>
+        <circle cx="96" cy="115" r="6" fill="#f4c99b" stroke="#7a4a22" stroke-width="1.5"/>
+      </g>
+      <!-- neck + head -->
+      <rect x="54" y="72" width="12" height="10" fill="#e8b886"/>
+      <circle cx="60" cy="56" r="23" fill="#f4c99b" stroke="#7a4a22" stroke-width="1.5"/>
+      <!-- hair tufts -->
+      <path d="M37 50 l-5 6 l7 -1 l-4 7 l7 -3 Z M83 50 l5 6 l-7 -1 l4 7 l-7 -3 Z" fill="#2a1a12"/>
+      <!-- face -->
+      <path d="M47 50 q5 -3 9 0 M64 50 q5 -3 9 0" stroke="#2a1a12" stroke-width="2" fill="none" stroke-linecap="round"/>
+      <ellipse cx="51.5" cy="57" rx="3.2" ry="4" fill="#1a1a1a"/><ellipse cx="68.5" cy="57" rx="3.2" ry="4" fill="#1a1a1a"/>
+      <circle cx="52.5" cy="55.5" r="1.2" fill="#fff"/><circle cx="69.5" cy="55.5" r="1.2" fill="#fff"/>
+      <circle cx="45" cy="64" r="3" fill="#ef8d7a" opacity=".55"/><circle cx="75" cy="64" r="3" fill="#ef8d7a" opacity=".55"/>
+      <path style="display: var(--grin, inline)" d="M49 65 Q60 77 71 65 Q60 69 49 65 Z" fill="#fff" stroke="#2a1a12" stroke-width="1.6" stroke-linejoin="round"/>
+      <ellipse style="display: var(--open, none)" cx="60" cy="68" rx="6" ry="5" fill="#5a1010" stroke="#2a1a12" stroke-width="1.6"/>
+      <!-- straw hat -->
+      <use href="#hatSym" x="14" y="1" width="92" height="55"/>
+    </g>
+  </symbol>
+</svg>
+
+<script src="menu-data.js"></script>
+<script>
+// ===================== CONFIG =====================
+// FriesLab's WhatsApp number, international format, digits only (e.g. '9617XXXXXXX').
+// Left empty, WhatsApp opens with the message ready and the customer picks the chat.
+const WHATSAPP_NUMBER = '';
+const POINTS_PER_DOLLAR = 10;
+const RANKS = [
+  { name: 'Stowaway', at: 0 },
+  { name: 'Deckhand', at: 300 },
+  { name: 'Navigator', at: 800 },
+  { name: 'First Mate', at: 1500 },
+  { name: 'Captain', at: 3000 },
+  { name: 'Pirate King', at: 6000 },
+];
+const SHOULDER = { x: 84, y: 90 };   // stretchy-arm shoulder, in mascot viewBox units
+
+// ===================== STATE =====================
+const $ = (id) => document.getElementById(id);
+const $$ = (sel) => document.querySelectorAll(sel);
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('fl_' + k); return v ? JSON.parse(v) : d; } catch { return d; } },
+  set(k, v) { try { localStorage.setItem('fl_' + k, JSON.stringify(v)); } catch {} },
+};
+const { categories, items } = window.MENU;
+const byId = Object.fromEntries(items.map((i) => [i.id, i]));
+let cart = store.get('cart', {});
+for (const id in cart) if (!byId[id]) delete cart[id];
+let crew = store.get('crew', { joined: false, name: '', phone: '', points: 0 });
+let activeCat = categories[0].id;
+let orderType = 'Delivery';
+let securedShown = false;
+const isWeb = () => matchMedia('(min-width: 1024px)').matches;
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+const money = (n) => '$' + n.toFixed(2);
+const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const title = (s) => s.replace(/\w\S*/g, (w) => w[0].toUpperCase() + w.slice(1).toLowerCase());
+const cartLines = () => Object.entries(cart).filter(([, q]) => q > 0).map(([id, q]) => ({ item: byId[id], q }));
+const cartCount = () => cartLines().reduce((a, l) => a + l.q, 0);
+const cartTotal = () => Math.round(cartLines().reduce((a, l) => a + l.q * l.item.price, 0) * 100) / 100;
+const save = () => store.set('cart', cart);
+const restart = (el, cls) => { el.classList.remove(cls); void el.getBoundingClientRect(); el.classList.add(cls); };
+
+function toast(msg) {
+  const t = $('toast'); t.textContent = msg; t.classList.add('show');
+  clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+// ===================== LOYALTY =====================
+function rankFor(p) {
+  let i = 0; while (i + 1 < RANKS.length && p >= RANKS[i + 1].at) i++;
+  return { cur: RANKS[i], next: RANKS[i + 1] };
+}
+function renderCrew() {
+  const { cur, next } = rankFor(crew.points);
+  $('rankName').textContent = cur.name;
+  $('rankNext').textContent = next ? `${next.at - crew.points} to ${next.name}` : `${crew.points} pts · top rank`;
+  $('rankFill').style.width = next ? ((crew.points - cur.at) / (next.at - cur.at) * 100) + '%' : '100%';
+  const star = '<svg viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3 6.5 7 .8-5.2 4.8 1.5 7L12 17.6 5.7 21l1.5-7L2 9.3l7-.8z"/></svg>';
+  $('joinBtn').innerHTML = star + (crew.joined ? `${crew.points} pts` : 'Join &amp; earn');
+  $('rankList').innerHTML = RANKS.map((r) => `<div class="${r === cur ? 'me' : ''}"><span>${r.name}</span><span>${r.at} pts</span></div>`).join('');
+}
+function addPoints(n) { crew.points += n; store.set('crew', crew); renderCrew(); }
+
+// ===================== MENU =====================
+function renderPills() {
+  $('pills').innerHTML = categories.map((c) => {
+    const n = items.filter((i) => i.cat === c.id).length;
+    return `<button class="pill ${c.id === activeCat ? 'active' : ''}" data-cat="${c.id}">${esc(c.name.toUpperCase())}<span class="n">${n}</span></button>`;
+  }).join('');
+}
+function stepperHTML(id) {
+  return `<div class="stepper"><button data-dec="${id}" aria-label="Remove one">−</button><output>${cart[id]}</output><button class="plus" data-inc="${id}" aria-label="Add one">+</button></div>`;
+}
+function ctrlHTML(id) {
+  const plus = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><path d="M12 5v14M5 12h14"/></svg>';
+  return cart[id] ? stepperHTML(id) : `<button class="add" data-inc="${id}" aria-label="Add to treasure">${plus}</button>`;
+}
+function renderItems() {
+  const list = items.filter((i) => i.cat === activeCat);
+  $('bench').textContent = `${list.length} on the bench`;
+  $('items').innerHTML = list.map((it, n) => `
+    <article class="card" data-id="${it.id}" style="animation-delay:${Math.min(n, 8) * 45}ms">
+      <div class="ph">
+        ${it.img ? `<img src="${it.img}" alt="${esc(it.name)}" loading="lazy">` : ''}
+        <div class="badges">${it.isNew ? '<span class="badge new">NEW</span>' : ''}${it.best ? '<span class="badge best">BESTSELLER</span>' : ''}${it.hot ? '<span class="badge">🌶 SPICY</span>' : ''}</div>
+      </div>
+      <h3>${esc(it.name.toUpperCase())}</h3>
+      ${it.desc ? `<p class="desc">${esc(it.desc)}</p>` : ''}
+      <div class="foot"><span class="price">${money(it.price)}</span><span class="ctrl" data-ctrl="${it.id}">${ctrlHTML(it.id)}</span></div>
+    </article>`).join('');
+}
+function refreshCtrl(id) {
+  const el = document.querySelector(`[data-ctrl="${id}"]`);
+  if (el) el.innerHTML = ctrlHTML(id);
+}
+
+// ===================== TREASURE / CART =====================
+function renderTreasure() {
+  const lines = cartLines(), count = cartCount(), total = cartTotal(), has = count > 0;
+  $('chest').classList.toggle('open', has);
+  $('chestWrap').classList.toggle('open', has);
+  $('pieces').textContent = has ? `${count} piece${count === 1 ? '' : 's'} of eight` : 'Empty chest';
+  $('lootTotal').textContent = money(total);
+  $('lootList').innerHTML = has
+    ? lines.slice(0, 4).map((l) => `<li><b>${l.q}X</b><span>${esc(title(l.item.name))}</span></li>`).join('')
+    : '<li class="hint">Tap + and I\'ll grab it for you!</li>';
+  $('lootMore').textContent = lines.length > 4 ? `+${lines.length - 4}` : '';
+
+  const spots = [[100,74],[86,76],[114,76],[72,78],[128,78],[93,68],[107,68],[60,80],[140,80],[100,62],[80,70],[120,70],[66,74],[134,74]];
+  $('coinPile').innerHTML = spots.slice(0, Math.min(count + 2, spots.length))
+    .map(([x, y]) => `<ellipse cx="${x}" cy="${y}" rx="11" ry="7" fill="url(#coin)" stroke="#8a6410" stroke-width="1"/>`).join('');
+
+  const sec = $('secured');
+  sec.classList.toggle('show', has);
+  if (has && !securedShown) restart(sec, 'stamp');
+  securedShown = has;
+
+  // mobile bar
+  $('bar').classList.toggle('show', has);
+  $('barTxt').textContent = `${count} · ${money(total)}`;
+  // web side cart
+  $('cartList').innerHTML = has
+    ? lines.map((l) => `<div class="cart-row"><span class="nm">${esc(title(l.item.name))}</span>${stepperHTML(l.item.id)}<span class="pr">${money(l.q * l.item.price)}</span></div>`).join('')
+    : '<div class="cart-empty">Your chest is empty. Pick something tasty and the captain will grab it.</div>';
+  $('sideTotal').textContent = money(total);
+  $$('[data-send]').forEach((b) => (b.disabled = !has));
+}
+
+function changeQty(id, delta, srcEl) {
+  const card = srcEl && srcEl.closest('.card');   // look it up before the button gets re-rendered
+  cart[id] = Math.max(0, (cart[id] || 0) + delta);
+  if (!cart[id]) delete cart[id];
+  save(); refreshCtrl(id); renderTreasure();
+  if (delta > 0) {
+    if (card && !reduceMotion) grab(card);
+    else bumpDest();
+  }
+}
+
+// ===================== THE STRETCHY ARM =====================
+const SVGNS = 'http://www.w3.org/2000/svg';
+let activeGrabs = 0, peekTimer = 0;
+
+function onScreen(el, margin = 0) {
+  const r = el.getBoundingClientRect();
+  return r.width > 0 && r.bottom > margin && r.top < innerHeight - margin;
+}
+// Which mascot does the grabbing? The big one if visible, otherwise the little one that pops up.
+function pickMascot() {
+  const big = $('mascot');
+  if (onScreen(big, 40)) return { mascot: big, dest: () => $('chest'), peek: false };
+  const peek = $('peek');
+  const app = document.querySelector('.app').getBoundingClientRect();
+  peek.style.left = (app.left + 6) + 'px';
+  clearTimeout(peekTimer); peek.classList.add('show');
+  return { mascot: peek, dest: () => $('barSum'), peek: true };
+}
+function shoulderOf(svg) {
+  const m = svg.getScreenCTM();
+  return { x: m.a * SHOULDER.x + m.c * SHOULDER.y + m.e, y: m.b * SHOULDER.x + m.d * SHOULDER.y + m.f, scale: m.a };
+}
+const center = (el) => { const r = el.getBoundingClientRect(); return { x: r.left + r.width / 2, y: r.top + r.height / 2, r }; };
+const lerp = (a, b, t) => ({ x: a.x + (b.x - a.x) * t, y: a.y + (b.y - a.y) * t });
+const easeOutBack = (t) => { const c = 1.9; return 1 + (c + 1) * Math.pow(t - 1, 3) + c * Math.pow(t - 1, 2); };
+const easeInOut = (t) => (t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+const easeIn = (t) => t * t * t;
+
+function grab(card) {
+  const who = pickMascot();
+  const ph = card.querySelector('.ph');
+  const img = card.querySelector('img');
+  const target = center(ph);
+  activeGrabs++;
+
+  // arm pieces
+  const g = document.createElementNS(SVGNS, 'g');
+  const mk = (tag, attrs) => { const e = document.createElementNS(SVGNS, tag); for (const k in attrs) e.setAttribute(k, attrs[k]); g.appendChild(e); return e; };
+  const outline = mk('path', { fill: 'none', stroke: '#7a4a22', 'stroke-linecap': 'round' });
+  const skin = mk('path', { fill: 'none', stroke: '#f4c99b', 'stroke-linecap': 'round' });
+  const shine = mk('path', { fill: 'none', stroke: '#ffe2c2', 'stroke-linecap': 'round', opacity: '.7' });
+  const sleeve = mk('path', { fill: 'none', stroke: '#b3161a', 'stroke-linecap': 'round' });
+  const fist = mk('circle', { fill: '#f4c99b', stroke: '#7a4a22', 'stroke-width': 2 });
+  const knuckles = mk('path', { fill: 'none', stroke: '#7a4a22', 'stroke-width': 1.5, 'stroke-linecap': 'round' });
+  $('armLayer').appendChild(g);
+
+  const food = document.createElement('div');
+  food.className = 'food';
+  food.style.backgroundImage = img ? `url("${img.src}")` : 'none';
+  food.style.display = 'none';
+  document.body.appendChild(food);
+
+  who.mascot.classList.add('reaching');
+  const T_REACH = 330, T_HOLD = 430, T_CARRY = 860, T_SNAP = 1020;
+  const t0 = performance.now() + (who.peek ? 180 : 0);   // let the peek mascot pop up first
+  let dest = null;
+
+  function draw(S, H, wobble, scale) {
+    const dx = H.x - S.x, dy = H.y - S.y, len = Math.hypot(dx, dy) || 1;
+    const nx = -dy / len, ny = dx / len;
+    const bend = Math.min(len * .12, 36) * (dx >= 0 ? 1 : -1) + wobble;
+    const C = { x: (S.x + H.x) / 2 + nx * bend, y: (S.y + H.y) / 2 + ny * bend };
+    const w = Math.max(5, (13 - len / 80)) * Math.max(scale, .7);   // rubber gets thinner as it stretches
+    const d = `M${S.x} ${S.y} Q${C.x} ${C.y} ${H.x} ${H.y}`;
+    outline.setAttribute('d', d); outline.setAttribute('stroke-width', w + 3.5);
+    skin.setAttribute('d', d); skin.setAttribute('stroke-width', w);
+    shine.setAttribute('d', `M${S.x + nx * w * .25} ${S.y + ny * w * .25} Q${C.x + nx * w * .25} ${C.y + ny * w * .25} ${H.x} ${H.y}`);
+    shine.setAttribute('stroke-width', Math.max(1.2, w * .22));
+    const ux = dx / len, uy = dy / len;
+    sleeve.setAttribute('d', `M${S.x} ${S.y} L${S.x + ux * 7 * scale} ${S.y + uy * 7 * scale}`);
+    sleeve.setAttribute('stroke-width', w + 8);
+    const fr = w * .75 + 5;
+    fist.setAttribute('cx', H.x); fist.setAttribute('cy', H.y); fist.setAttribute('r', fr);
+    knuckles.setAttribute('d', `M${H.x + ux * fr * .4 - nx * fr * .5} ${H.y + uy * fr * .4 - ny * fr * .5} L${H.x + ux * fr * .4 + nx * fr * .5} ${H.y + uy * fr * .4 + ny * fr * .5}`);
+  }
+
+  function frame(now) {
+    const t = now - t0;
+    const sh = shoulderOf(who.mascot), S = { x: sh.x, y: sh.y }, sc = sh.scale;
+    if (t < 0) { requestAnimationFrame(frame); return; }
+    let H;
+    if (t < T_REACH) {
+      const p = t / T_REACH;
+      H = lerp(S, target, easeOutBack(p));
+      draw(S, H, Math.sin(t / 40) * 18 * (1 - p), sc);
+    } else if (t < T_HOLD) {
+      H = target;
+      if (food.style.display === 'none') { food.style.display = 'block'; food.animate([{ transform: 'scale(.4)' }, { transform: 'scale(1.15)' }, { transform: 'scale(1)' }], 220); restart(ph, 'grabbed'); }
+      draw(S, H, Math.sin(t / 30) * 6, sc);
+    } else if (t < T_CARRY) {
+      if (!dest) { dest = center(who.dest()); dest.y -= who.peek ? 0 : dest.r.height * .18; }
+      const p = (t - T_HOLD) / (T_CARRY - T_HOLD);
+      H = lerp(target, dest, easeInOut(p));
+      draw(S, H, Math.sin(t / 35) * 14 * (1 - p), sc);
+    } else if (t < T_SNAP) {
+      const p = (t - T_CARRY) / (T_SNAP - T_CARRY);
+      H = lerp(dest, S, easeIn(p));
+      draw(S, H, 0, sc);
+      food.style.left = dest.x + 'px'; food.style.top = dest.y + 'px';
+      food.style.transform = `scale(${1 - p * .9})`; food.style.opacity = 1 - p * .8;
+      requestAnimationFrame(frame); return;
+    } else {
+      g.remove(); food.remove();
+      who.mascot.classList.remove('reaching');
+      bumpDest(who.dest());
+      if (--activeGrabs <= 0 && who.peek) peekTimer = setTimeout(() => $('peek').classList.remove('show'), 500);
+      return;
+    }
+    if (food.style.display !== 'none') { food.style.left = H.x + 'px'; food.style.top = H.y + 'px'; }
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+function bumpDest(el) {
+  el = el || (onScreen($('chest')) ? $('chest') : $('barSum'));
+  restart(el, el.id === 'chest' ? 'bump' : 'pop');
+}
+
+// ===================== CHECKOUT =====================
+function openCheckout() {
+  const lines = cartLines();
+  if (!lines.length) return;
+  const fry = '<svg viewBox="0 0 16 16"><path d="M3 6h10l-1.5 9h-7z" fill="#b3161a"/><path d="M5 6V1.5M8 6V1M11 6V2" stroke="#f3cd5d" stroke-width="1.8" stroke-linecap="round"/></svg>';
+  $('receiptRows').innerHTML = lines.map((l) =>
+    `<div class="row">${fry}<span class="nm">${esc(title(l.item.name))}</span>${l.q > 1 ? `<span class="qt">${l.q}X</span>` : ''}<span class="pr">${money(l.q * l.item.price)}</span></div>`).join('');
+  $('receiptTotal').textContent = money(cartTotal());
+  $('earnNote').textContent = `+${Math.round(cartTotal() * POINTS_PER_DOLLAR)} points when you send this order`;
+  if (crew.name && !$('fName').value) $('fName').value = crew.name;
+  if (crew.phone && !$('fPhone').value) $('fPhone').value = crew.phone;
+  const rc = $('readyCheck'); rc.classList.remove('done');
+  $('checkout').classList.add('show');
+  $('checkout').querySelector('.sheet').scrollTop = 0;
+  setTimeout(() => rc.classList.add('done'), 900);
+}
+function setType(t) {
+  orderType = t;
+  $$('.type').forEach((b) => b.classList.toggle('active', b.dataset.type === t));
+  $('fAddress').classList.toggle('hidden', t !== 'Delivery');
+  $('fTable').classList.toggle('hidden', t !== 'Dine in');
+  $('fPhone').classList.toggle('hidden', t === 'Dine in');
+}
+function sendOrder() {
+  const need = [$('fName')];
+  if (orderType === 'Delivery') need.push($('fPhone'), $('fAddress'));
+  if (orderType === 'Take out') need.push($('fPhone'));
+  if (orderType === 'Dine in') need.push($('fTable'));
+  need.forEach((f) => f.classList.remove('bad'));
+  const missing = need.filter((f) => !f.value.trim());
+  if (missing.length) { missing.forEach((f) => restart(f, 'bad')); missing[0].focus(); return; }
+
+  const L = ['🏴‍☠️ *New FriesLab order*', '', `*Order type:* ${orderType}`, `*Name:* ${$('fName').value.trim()}`];
+  if (orderType !== 'Dine in') L.push(`*Phone:* ${$('fPhone').value.trim()}`);
+  if (orderType === 'Delivery') L.push(`*Address:* ${$('fAddress').value.trim()}`);
+  if (orderType === 'Dine in') L.push(`*Table:* ${$('fTable').value.trim()}`);
+  L.push('', '*Items*');
+  for (const l of cartLines()) L.push(`${l.q}x ${title(l.item.name)} — ${money(l.q * l.item.price)}`);
+  L.push('', `*Total:* ${money(cartTotal())}`);
+  const notes = $('fNotes').value.trim();
+  if (notes) L.push('', `*Notes:* ${notes}`);
+  if (crew.joined) L.push('', `Crew member · ${rankFor(crew.points).cur.name}`);
+  window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(L.join('\n'))}`, '_blank');
+
+  const earned = Math.round(cartTotal() * POINTS_PER_DOLLAR);
+  addPoints(earned);
+  if (!crew.name) { crew.name = $('fName').value.trim(); crew.phone = $('fPhone').value.trim(); store.set('crew', crew); }
+  cart = {}; save(); renderTreasure(); renderItems();
+  $('checkout').classList.remove('show');
+  toast(`Order sent · +${earned} points`);
+  openGame();
+}
+
+// ===================== MINI-GAME: Hat Flight =====================
+const G = { running: false, raf: 0 };
+const hatImg = new Image();
+hatImg.src = 'data:image/svg+xml;utf8,' + encodeURIComponent(
+  `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 60">${$('hatSym').innerHTML}</svg>`);
+
+function openGame() {
+  $('game').classList.add('show');
+  $('gStart').classList.remove('hidden'); $('gOver').classList.add('hidden');
+  const best = store.get('best', 0);
+  $('gBest').textContent = best ? `Best: ${best}` : '';
+  resetGame(); drawGame();
+}
+function closeGame() { G.running = false; cancelAnimationFrame(G.raf); $('game').classList.remove('show'); }
+function sizeCanvas() {
+  const c = $('gc'), r = c.getBoundingClientRect(), d = Math.min(devicePixelRatio || 1, 2);
+  c.width = r.width * d; c.height = r.height * d; G.w = r.width; G.h = r.height; G.dpr = d;
+}
+function resetGame() {
+  sizeCanvas();
+  G.ground = G.h - 70;
+  G.hat = { x: G.w * 0.28, y: G.h * 0.42, vy: 0, r: 20 };
+  G.pipes = []; G.fries = []; G.score = 0; G.spawn = 0.6; G.scroll = 0;
+  $('gScore').textContent = '0';
+}
+function startGame() {
+  resetGame();
+  $('gStart').classList.add('hidden'); $('gOver').classList.add('hidden');
+  G.running = true; G.last = performance.now(); flap();
+  cancelAnimationFrame(G.raf); G.raf = requestAnimationFrame(loop);
+}
+function flap() { if (G.running) G.hat.vy = -430; }
+function endGame() {
+  G.running = false;
+  const best = Math.max(store.get('best', 0), G.score); store.set('best', best);
+  addPoints(G.score);
+  $('gFinal').textContent = G.score;
+  $('gEarned').textContent = G.score ? `+${G.score} points added to your rank · best ${best}` : `Best ${best}. Give it another go!`;
+  $('gOver').classList.remove('hidden');
+}
+function loop(now) {
+  const dt = Math.min((now - G.last) / 1000, 0.034); G.last = now;
+  if (G.running) update(dt);
+  drawGame();
+  if (G.running) G.raf = requestAnimationFrame(loop);
+}
+function update(dt) {
+  const speed = 150 + Math.min(G.score * 3, 90);
+  G.scroll += speed * dt;
+  const h = G.hat; h.vy += 1500 * dt; h.y += h.vy * dt;
+  G.spawn -= dt;
+  if (G.spawn <= 0) {
+    G.spawn = 1.55;
+    const gap = Math.max(150, 185 - G.score * 2), top = 80 + Math.random() * (G.ground - gap - 160);
+    G.pipes.push({ x: G.w + 40, top, gap, passed: false });
+    if (Math.random() < 0.75) G.fries.push({ x: G.w + 72, y: top + gap / 2 + (Math.random() - .5) * gap * .4, got: false, a: Math.random() * 6 });
+  }
+  for (const p of G.pipes) {
+    p.x -= speed * dt;
+    if (!p.passed && p.x + 64 < h.x) { p.passed = true; G.score += 1; }
+    const inX = h.x + h.r * .8 > p.x && h.x - h.r * .8 < p.x + 64;
+    if (inX && (h.y - h.r * .55 < p.top || h.y + h.r * .55 > p.top + p.gap)) return endGame();
+  }
+  for (const f of G.fries) {
+    f.x -= speed * dt; f.a += dt * 4;
+    if (!f.got && Math.hypot(f.x - h.x, f.y - h.y) < h.r + 12) { f.got = true; G.score += 2; }
+  }
+  G.pipes = G.pipes.filter((p) => p.x > -80); G.fries = G.fries.filter((f) => f.x > -30 && !f.got);
+  if (h.y + h.r * .5 > G.ground || h.y < -40) return endGame();
+  $('gScore').textContent = G.score;
+}
+function drawGame() {
+  const x = $('gc').getContext('2d'), W = G.w, H = G.h;
+  x.setTransform(G.dpr, 0, 0, G.dpr, 0, 0);
+  const bg = x.createRadialGradient(W / 2, H * .35, 20, W / 2, H * .4, H);
+  bg.addColorStop(0, '#2b2416'); bg.addColorStop(1, '#100e0a');
+  x.fillStyle = bg; x.fillRect(0, 0, W, H);
+  for (const [par, col, r, off] of [[0.35, 'rgba(201,160,60,.16)', 120, 70], [0.6, 'rgba(201,160,60,.24)', 95, 40]]) {
+    x.fillStyle = col; const step = r * 1.5, sh = (G.scroll * par) % step;
+    for (let i = -1; i < W / step + 2; i++) { x.beginPath(); x.arc(i * step - sh + off, G.ground + 10, r, Math.PI, 0); x.fill(); }
+  }
+  for (const p of G.pipes) { drawPillar(x, p.x, 0, p.top, true); drawPillar(x, p.x, p.top + p.gap, G.ground - (p.top + p.gap), false); }
+  for (const f of G.fries) {
+    x.save(); x.translate(f.x, f.y); x.rotate(Math.sin(f.a) * .5);
+    x.fillStyle = '#f3cd5d'; x.strokeStyle = '#a87a10'; x.lineWidth = 1.5;
+    x.beginPath(); x.roundRect(-4, -15, 8, 30, 3); x.fill(); x.stroke();
+    x.fillStyle = 'rgba(255,255,255,.35)'; x.fillRect(-2, -12, 2, 22); x.restore();
+  }
+  x.fillStyle = '#b8902f'; x.fillRect(0, G.ground, W, H - G.ground);
+  x.fillStyle = '#e2b33b'; x.fillRect(0, G.ground, W, 4);
+  const h = G.hat; x.save(); x.translate(h.x, h.y);
+  x.rotate(Math.max(-0.5, Math.min(1.1, h.vy / 700)));
+  if (hatImg.complete) x.drawImage(hatImg, -32, -20, 64, 38);
+  x.restore();
+}
+function drawPillar(x, px, y, hgt, capBottom) {
+  if (hgt <= 0) return;
+  const w = 64;
+  x.fillStyle = '#d4a73a'; x.fillRect(px, y, w, hgt);
+  x.fillStyle = 'rgba(0,0,0,.12)'; x.fillRect(px + w - 10, y, 10, hgt);
+  x.save(); x.beginPath(); x.rect(px, y, w, hgt); x.clip();
+  for (let cy = (capBottom ? y + hgt - 40 : y + 40); capBottom ? cy > y - 30 : cy < y + hgt + 30; cy += capBottom ? -68 : 68) {
+    x.fillStyle = '#f6ecd6'; x.beginPath(); x.arc(px + w / 2, cy, 19, 0, 7); x.fill();
+    x.fillStyle = '#16120e'; x.beginPath(); x.arc(px + w / 2, cy, 16, 0, 7); x.fill();
+    x.fillStyle = 'rgba(255,255,255,.35)'; x.beginPath(); x.arc(px + w / 2 - 6, cy - 6, 3.5, 0, 7); x.fill();
+    star(x, px + w - 16, cy + 30 * (capBottom ? -1 : 1), 8);
+  }
+  x.restore();
+  x.fillStyle = '#2a2622';
+  x.beginPath(); x.roundRect(px - 8, capBottom ? y + hgt - 18 : y - 2, w + 16, 20, 9); x.fill();
+}
+function star(x, cx, cy, r) {
+  x.fillStyle = '#7a0f14'; x.beginPath();
+  for (let i = 0; i < 8; i++) { const a = i * Math.PI / 4, rr = i % 2 ? r * .35 : r; x.lineTo(cx + Math.cos(a) * rr, cy + Math.sin(a) * rr); }
+  x.closePath(); x.fill();
+  x.fillStyle = '#f3cd5d'; x.beginPath(); x.arc(cx, cy, r * .22, 0, 7); x.fill();
+}
+
+// ===================== EVENTS =====================
+$('pills').addEventListener('click', (e) => {
+  const b = e.target.closest('.pill'); if (!b) return;
+  activeCat = b.dataset.cat; renderPills(); renderItems();
+  if (!isWeb()) {
+    document.querySelector(`.pill[data-cat="${activeCat}"]`).scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' });
+    const top = document.querySelector('.pills-wrap').offsetTop;
+    if (scrollY > top) scrollTo({ top, behavior: 'smooth' });
+  } else if (scrollY > 200) scrollTo({ top: 0, behavior: 'smooth' });
+});
+document.addEventListener('click', (e) => {
+  const inc = e.target.closest('[data-inc]'), dec = e.target.closest('[data-dec]'), d = e.target.closest('.desc');
+  if (inc) changeQty(inc.dataset.inc, 1, inc);
+  else if (dec) changeQty(dec.dataset.dec, -1);
+  else if (d) d.classList.toggle('open');
+  else if (e.target.closest('[data-send]')) openCheckout();
+  else if (e.target.closest('[data-reset]') && cartCount() && confirm('Empty your treasure chest?')) { cart = {}; save(); renderTreasure(); renderItems(); }
+});
+$('closeCheckout').onclick = () => $('checkout').classList.remove('show');
+$('types').addEventListener('click', (e) => { const b = e.target.closest('.type'); if (b) setType(b.dataset.type); });
+$('waBtn').onclick = sendOrder;
+for (const o of [$('checkout'), $('joinModal')]) o.addEventListener('click', (e) => { if (e.target === o) o.classList.remove('show'); });
+addEventListener('keydown', (e) => { if (e.key === 'Escape') { $('checkout').classList.remove('show'); $('joinModal').classList.remove('show'); } });
+
+$('joinBtn').onclick = () => { $('jName').value = crew.name; $('jPhone').value = crew.phone; $('joinModal').classList.add('show'); };
+$('joinClose').onclick = () => $('joinModal').classList.remove('show');
+$('joinSave').onclick = () => {
+  const n = $('jName').value.trim(), p = $('jPhone').value.trim();
+  if (!n) { restart($('jName'), 'bad'); return; }
+  const first = !crew.joined;
+  Object.assign(crew, { joined: true, name: n, phone: p }); store.set('crew', crew);
+  $('joinModal').classList.remove('show');
+  if (first) { addPoints(50); toast('Welcome aboard! +50 points'); } else renderCrew();
+};
+
+$('gPlay').onclick = startGame; $('gAgain').onclick = startGame;
+$('gBack').onclick = closeGame; $('gClose').onclick = closeGame;
+$('gc').addEventListener('pointerdown', (e) => { e.preventDefault(); flap(); });
+addEventListener('keydown', (e) => {
+  if (!$('game').classList.contains('show') || !(e.code === 'Space' || e.code === 'ArrowUp')) return;
+  e.preventDefault();
+  if (G.running) flap(); else startGame();
+});
+addEventListener('resize', () => { if ($('game').classList.contains('show') && !G.running) { resetGame(); drawGame(); } });
+
+// ===================== INIT =====================
+// Open index.html#play to jump straight into the mini-game.
+renderCrew(); renderPills(); renderItems(); renderTreasure(); setType('Delivery');
+if (location.hash === '#play') openGame();
+</script>
+</body>
+</html>
